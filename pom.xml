@@ -22,7 +22,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.bisq</groupId>
     <artifactId>statsnode</artifactId>
-    <version>-SNAPSHOT</version>
+    <version>0.7.0-SNAPSHOT</version>
 
     <build>
         <plugins>
