@@ -17,19 +17,6 @@
 
 package bisq.statistics;
 
-import ch.qos.logback.classic.Level;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import bisq.common.CommonOptionKeys;
-import bisq.common.UserThread;
-import bisq.common.app.Capabilities;
-import bisq.common.app.Log;
-import bisq.common.app.Version;
-import bisq.common.crypto.LimitedKeyStrengthException;
-import bisq.common.handlers.ResultHandler;
-import bisq.common.locale.CurrencyUtil;
-import bisq.common.locale.Res;
-import bisq.common.util.Utilities;
 import bisq.core.app.AppOptionKeys;
 import bisq.core.app.AppSetup;
 import bisq.core.app.AppSetupWithP2P;
@@ -43,18 +30,41 @@ import bisq.core.offer.OfferBookService;
 import bisq.core.offer.OpenOfferManager;
 import bisq.core.provider.price.PriceFeedService;
 import bisq.core.trade.statistics.TradeStatisticsManager;
+
 import bisq.network.p2p.BootstrapListener;
 import bisq.network.p2p.P2PService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import bisq.common.CommonOptionKeys;
+import bisq.common.UserThread;
+import bisq.common.app.Capabilities;
+import bisq.common.app.Log;
+import bisq.common.app.Version;
+import bisq.common.crypto.LimitedKeyStrengthException;
+import bisq.common.handlers.ResultHandler;
+import bisq.common.locale.CurrencyUtil;
+import bisq.common.locale.Res;
+import bisq.common.util.Utilities;
+
 import org.bitcoinj.store.BlockStoreException;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+
+import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import ch.qos.logback.classic.Level;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Statistics {
