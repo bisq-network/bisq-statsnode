@@ -22,9 +22,9 @@ import bisq.common.UserThread;
 import bisq.common.util.Profiler;
 import bisq.common.util.RestartUtil;
 import bisq.common.util.Utilities;
-import io.bisq.core.app.AppOptionKeys;
-import io.bisq.core.app.BisqEnvironment;
-import io.bisq.core.app.BisqExecutable;
+import bisq.core.app.AppOptionKeys;
+import bisq.core.app.BisqEnvironment;
+import bisq.core.app.BisqExecutable;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -38,8 +38,8 @@ import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import static io.bisq.core.app.BisqEnvironment.DEFAULT_APP_NAME;
-import static io.bisq.core.app.BisqEnvironment.DEFAULT_USER_DATA_DIR;
+import static bisq.core.app.BisqEnvironment.DEFAULT_APP_NAME;
+import static bisq.core.app.BisqEnvironment.DEFAULT_USER_DATA_DIR;
 
 public class StatisticsMain extends BisqExecutable {
     private static final Logger log = LoggerFactory.getLogger(StatisticsMain.class);
