@@ -1,4 +1,4 @@
-package io.bisq.statistics;
+package bisq.statistics;
 
 import ch.qos.logback.classic.Level;
 import com.google.inject.Guice;
