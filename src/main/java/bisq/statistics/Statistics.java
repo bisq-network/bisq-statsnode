@@ -1,43 +1,70 @@
-package io.bisq.statistics;
+/*
+ * This file is part of Bisq.
+ *
+ * Bisq is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at
+ * your option) any later version.
+ *
+ * Bisq is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bisq. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import ch.qos.logback.classic.Level;
+package bisq.statistics;
+
+import bisq.core.app.AppOptionKeys;
+import bisq.core.app.AppSetup;
+import bisq.core.app.AppSetupWithP2P;
+import bisq.core.app.BisqEnvironment;
+import bisq.core.arbitration.ArbitratorManager;
+import bisq.core.btc.BaseCurrencyNetwork;
+import bisq.core.btc.wallet.BsqWalletService;
+import bisq.core.btc.wallet.BtcWalletService;
+import bisq.core.btc.wallet.WalletsSetup;
+import bisq.core.offer.OfferBookService;
+import bisq.core.offer.OpenOfferManager;
+import bisq.core.provider.price.PriceFeedService;
+import bisq.core.trade.statistics.TradeStatisticsManager;
+
+import bisq.network.p2p.BootstrapListener;
+import bisq.network.p2p.P2PService;
+
+import bisq.common.CommonOptionKeys;
+import bisq.common.UserThread;
+import bisq.common.app.Capabilities;
+import bisq.common.app.Log;
+import bisq.common.app.Version;
+import bisq.common.crypto.LimitedKeyStrengthException;
+import bisq.common.handlers.ResultHandler;
+import bisq.common.locale.CurrencyUtil;
+import bisq.common.locale.Res;
+import bisq.common.util.Utilities;
+
+import org.bitcoinj.store.BlockStoreException;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.bisq.common.CommonOptionKeys;
-import io.bisq.common.UserThread;
-import io.bisq.common.app.Capabilities;
-import io.bisq.common.app.Log;
-import io.bisq.common.app.Version;
-import io.bisq.common.crypto.LimitedKeyStrengthException;
-import io.bisq.common.handlers.ResultHandler;
-import io.bisq.common.locale.CurrencyUtil;
-import io.bisq.common.locale.Res;
-import io.bisq.common.util.Utilities;
-import io.bisq.core.app.AppOptionKeys;
-import io.bisq.core.app.AppSetup;
-import io.bisq.core.app.AppSetupWithP2P;
-import io.bisq.core.app.BisqEnvironment;
-import io.bisq.core.arbitration.ArbitratorManager;
-import io.bisq.core.btc.BaseCurrencyNetwork;
-import io.bisq.core.btc.wallet.BsqWalletService;
-import io.bisq.core.btc.wallet.BtcWalletService;
-import io.bisq.core.btc.wallet.WalletsSetup;
-import io.bisq.core.offer.OfferBookService;
-import io.bisq.core.offer.OpenOfferManager;
-import io.bisq.core.provider.price.PriceFeedService;
-import io.bisq.core.trade.statistics.TradeStatisticsManager;
-import io.bisq.network.p2p.BootstrapListener;
-import io.bisq.network.p2p.P2PService;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.bitcoinj.store.BlockStoreException;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+
+import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import ch.qos.logback.classic.Level;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Statistics {
