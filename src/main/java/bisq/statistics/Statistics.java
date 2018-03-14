@@ -26,6 +26,8 @@ import bisq.core.btc.BaseCurrencyNetwork;
 import bisq.core.btc.wallet.BsqWalletService;
 import bisq.core.btc.wallet.BtcWalletService;
 import bisq.core.btc.wallet.WalletsSetup;
+import bisq.core.locale.CurrencyUtil;
+import bisq.core.locale.Res;
 import bisq.core.offer.OfferBookService;
 import bisq.core.offer.OpenOfferManager;
 import bisq.core.provider.price.PriceFeedService;
@@ -41,8 +43,6 @@ import bisq.common.app.Log;
 import bisq.common.app.Version;
 import bisq.common.crypto.LimitedKeyStrengthException;
 import bisq.common.handlers.ResultHandler;
-import bisq.common.locale.CurrencyUtil;
-import bisq.common.locale.Res;
 import bisq.common.util.Utilities;
 
 import org.bitcoinj.store.BlockStoreException;
