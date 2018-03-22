@@ -6,7 +6,7 @@
 
 ## Run
 
-    java -jar build/libs/bisq-statsnode.jar
+    ./build/app/bin/bisq-statsnode [options]
 
 ## Import into IDEA
 
