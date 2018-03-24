@@ -2,11 +2,11 @@
 
 ## Build
 
-    mvn package
+    ./gradlew build
 
 ## Run
 
-    java -jar target/Statistics.jar
+    ./build/app/bin/bisq-statsnode [options]
 
 ## Import into IDEA
 
