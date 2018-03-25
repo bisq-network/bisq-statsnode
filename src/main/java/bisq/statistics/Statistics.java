@@ -158,7 +158,8 @@ public class Statistics {
                 Capabilities.Capability.TRADE_STATISTICS.ordinal(),
                 Capabilities.Capability.TRADE_STATISTICS_2.ordinal(),
                 Capabilities.Capability.ACCOUNT_AGE_WITNESS.ordinal(),
-                Capabilities.Capability.COMP_REQUEST.ordinal()
+                Capabilities.Capability.COMP_REQUEST.ordinal(),
+                Capabilities.Capability.VOTE.ordinal()
         )));
         appSetup.start();
     }
