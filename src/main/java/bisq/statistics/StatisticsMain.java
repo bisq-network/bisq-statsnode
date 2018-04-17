@@ -48,6 +48,8 @@ public class StatisticsMain extends HeadlessExecutable {
         super.doExecute(options);
 
         checkMemory(bisqEnvironment, statistics);
+
+        keepRunning();
     }
 
     @Override
@@ -57,7 +59,7 @@ public class StatisticsMain extends HeadlessExecutable {
     }
 
     @Override
-    protected void launchApplication() {
+    protected void createAndLaunchApplication() {
         UserThread.execute(() -> {
             try {
                 statistics = new Statistics();
