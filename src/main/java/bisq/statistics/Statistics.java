@@ -28,7 +28,6 @@ import bisq.core.btc.wallet.WalletsSetup;
 import bisq.core.offer.OfferBookService;
 import bisq.core.offer.OpenOfferManager;
 import bisq.core.provider.price.PriceFeedService;
-import bisq.core.setup.CoreSetup;
 import bisq.core.trade.statistics.TradeStatisticsManager;
 
 import bisq.network.p2p.BootstrapListener;
@@ -65,7 +64,6 @@ public class Statistics implements ShutDownHandler {
         CommonSetup.setup((throwable, doShutDown) -> {
             log.error(throwable.toString());
         });
-        CoreSetup.setup(bisqEnvironment);
 
         log.info("Statistics.VERSION: " + VERSION);
 
