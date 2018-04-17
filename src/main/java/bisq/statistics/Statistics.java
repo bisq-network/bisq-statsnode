@@ -20,6 +20,7 @@ package bisq.statistics;
 import bisq.core.app.AppSetup;
 import bisq.core.app.AppSetupWithP2P;
 import bisq.core.app.BisqEnvironment;
+import bisq.core.app.ShutDownHandler;
 import bisq.core.arbitration.ArbitratorManager;
 import bisq.core.btc.wallet.BsqWalletService;
 import bisq.core.btc.wallet.BtcWalletService;
@@ -43,7 +44,7 @@ import com.google.inject.Injector;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Statistics {
+public class Statistics implements ShutDownHandler {
     public static final String VERSION = "0.6.1";
 
     private static BisqEnvironment bisqEnvironment;
@@ -101,6 +102,7 @@ public class Statistics {
         });
     }
 
+    @Override
     public void gracefulShutDown(ResultHandler resultHandler) {
         log.debug("gracefulShutDown");
         try {
