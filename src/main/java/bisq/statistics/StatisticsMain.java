@@ -57,7 +57,7 @@ public class StatisticsMain extends ExecutableForAppWithP2p {
         UserThread.execute(() -> {
             try {
                 statistics = new Statistics();
-                onApplicationLaunched();
+                UserThread.execute(this::onApplicationLaunched);
             } catch (Exception e) {
                 e.printStackTrace();
             }
