@@ -33,8 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Statistics {
-    public static final String VERSION = "0.6.1";
-
     @Setter
     private Injector injector;
 
@@ -45,7 +43,6 @@ public class Statistics {
     private AppSetup appSetup;
 
     public Statistics() {
-        log.info("Statistics.VERSION: " + VERSION);
     }
 
     public void startApplication() {

@@ -28,10 +28,15 @@ import bisq.common.setup.CommonSetup;
 
 import joptsimple.OptionSet;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class StatisticsMain extends ExecutableForAppWithP2p {
+    private static final String VERSION = "0.6.1";
     private Statistics statistics;
 
     public static void main(String[] args) throws Exception {
+        log.info("Statistics.VERSION: " + VERSION);
         BisqEnvironment.setDefaultAppName("bisq_statistics");
         if (BisqExecutable.setupInitialOptionParser(args))
             new StatisticsMain().execute(args);
