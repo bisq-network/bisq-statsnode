@@ -17,176 +17,77 @@
 
 package bisq.statistics;
 
-import bisq.core.app.AppOptionKeys;
 import bisq.core.app.BisqEnvironment;
 import bisq.core.app.BisqExecutable;
+import bisq.core.app.ExecutableForAppWithP2p;
+import bisq.core.app.ModuleForAppWithP2p;
 
 import bisq.common.UserThread;
-import bisq.common.util.Profiler;
-import bisq.common.util.RestartUtil;
-import bisq.common.util.Utilities;
+import bisq.common.app.AppModule;
+import bisq.common.setup.CommonSetup;
 
-import org.bitcoinj.store.BlockStoreException;
-
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.extern.slf4j.Slf4j;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import java.io.IOException;
-
-import java.util.Locale;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static bisq.core.app.BisqEnvironment.DEFAULT_APP_NAME;
-import static bisq.core.app.BisqEnvironment.DEFAULT_USER_DATA_DIR;
-
-public class StatisticsMain extends BisqExecutable {
-    private static final Logger log = LoggerFactory.getLogger(StatisticsMain.class);
-    private static final long MAX_MEMORY_MB_DEFAULT = 400;
-    private static final long CHECK_MEMORY_PERIOD_SEC = 3 * 60;
+@Slf4j
+public class StatisticsMain extends ExecutableForAppWithP2p {
+    private static final String VERSION = "0.6.1";
     private Statistics statistics;
-    private volatile boolean stopped;
-    private static long maxMemory = MAX_MEMORY_MB_DEFAULT;
-
-    static {
-        // Need to set default locale initially otherwise we get problems at non-english OS
-        Locale.setDefault(new Locale("en", Locale.getDefault().getCountry()));
-
-        Utilities.removeCryptographyRestrictions();
-    }
 
     public static void main(String[] args) throws Exception {
-        final ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                .setNameFormat("Statistics")
-                .setDaemon(true)
-                .build();
-        UserThread.setExecutor(Executors.newSingleThreadExecutor(threadFactory));
-
-        // We don't want to do the full argument parsing here as that might easily change in update versions
-        // So we only handle the absolute minimum which is APP_NAME, APP_DATA_DIR_KEY and USER_DATA_DIR
+        log.info("Statistics.VERSION: " + VERSION);
         BisqEnvironment.setDefaultAppName("bisq_statistics");
-        OptionParser parser = new OptionParser();
-        parser.allowsUnrecognizedOptions();
-        parser.accepts(AppOptionKeys.USER_DATA_DIR_KEY, description("User data directory", DEFAULT_USER_DATA_DIR))
-                .withRequiredArg();
-        parser.accepts(AppOptionKeys.APP_NAME_KEY, description("Application name", DEFAULT_APP_NAME))
-                .withRequiredArg();
-
-        OptionSet options;
-        try {
-            options = parser.parse(args);
-        } catch (OptionException ex) {
-            System.out.println("error: " + ex.getMessage());
-            System.out.println();
-            parser.printHelpOn(System.out);
-            System.exit(EXIT_FAILURE);
-            return;
-        }
-        BisqEnvironment bisqEnvironment = getBisqEnvironment(options);
-
-        // need to call that before BisqAppMain().execute(args)
-        BisqExecutable.initAppDir(bisqEnvironment.getProperty(AppOptionKeys.APP_DATA_DIR_KEY));
-
-        // For some reason the JavaFX launch process results in us losing the thread context class loader: reset it.
-        // In order to work around a bug in JavaFX 8u25 and below, you must include the following code as the first line of your realMain method:
-        Thread.currentThread().setContextClassLoader(StatisticsMain.class.getClassLoader());
-
-        new StatisticsMain().execute(args);
+        if (BisqExecutable.setupInitialOptionParser(args))
+            new StatisticsMain().execute(args);
     }
 
-    @SuppressWarnings("InfiniteLoopStatement")
     @Override
     protected void doExecute(OptionSet options) {
-        final BisqEnvironment bisqEnvironment = getBisqEnvironment(options);
-        Statistics.setEnvironment(bisqEnvironment);
+        super.doExecute(options);
 
-        UserThread.execute(() -> statistics = new Statistics());
+        CommonSetup.setup(this);
+        checkMemory(bisqEnvironment, this);
 
-        Thread.UncaughtExceptionHandler handler = (thread, throwable) -> {
-            if (throwable.getCause() != null && throwable.getCause().getCause() != null &&
-                    throwable.getCause().getCause() instanceof BlockStoreException) {
-                log.error(throwable.getMessage());
-            } else {
-                log.error("Uncaught Exception from thread " + Thread.currentThread().getName());
-                log.error("throwableMessage= " + throwable.getMessage());
-                log.error("throwableClass= " + throwable.getClass());
-                log.error("Stack trace:\n" + ExceptionUtils.getStackTrace(throwable));
-                throwable.printStackTrace();
-                log.error("We shut down the app because an unhandled error occurred");
-                // We don't use the restart as in case of OutOfMemory errors the restart might fail as well
-                // The run loop will restart the node anyway...
-                System.exit(EXIT_FAILURE);
-            }
-        };
-        Thread.setDefaultUncaughtExceptionHandler(handler);
-        Thread.currentThread().setUncaughtExceptionHandler(handler);
-
-        String maxMemoryOption = bisqEnvironment.getProperty(AppOptionKeys.MAX_MEMORY);
-        if (maxMemoryOption != null && !maxMemoryOption.isEmpty()) {
-            try {
-                maxMemory = Integer.parseInt(maxMemoryOption);
-            } catch (Throwable t) {
-                log.error(t.getMessage());
-            }
-        }
-
-        UserThread.runPeriodically(() -> {
-            Profiler.printSystemLoad(log);
-            if (!stopped) {
-                long usedMemoryInMB = Profiler.getUsedMemoryInMB();
-                if (usedMemoryInMB > (maxMemory * 0.8)) {
-                    log.warn("\n\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" +
-                                    "We are over our memory warn limit and call the GC. usedMemoryInMB: {}" +
-                                    "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\n",
-                            usedMemoryInMB);
-                    System.gc();
-                    Profiler.printSystemLoad(log);
-                }
-
-                UserThread.runAfter(() -> {
-                    final long finalUsedMemoryInMB = Profiler.getUsedMemoryInMB();
-                    if (finalUsedMemoryInMB > maxMemory) {
-                        log.error("\n\n############################################################\n" +
-                                        "We shut down as we are over our memory limit. usedMemoryInMB: {}" +
-                                        "\n############################################################\n\n",
-                                finalUsedMemoryInMB);
-                        System.exit(EXIT_FAILURE);
-                    }
-                }, 5);
-            }
-        }, CHECK_MEMORY_PERIOD_SEC);
-
-        while (true) {
-            try {
-                Thread.sleep(Long.MAX_VALUE);
-            } catch (InterruptedException ignore) {
-            }
-        }
+        keepRunning();
     }
 
-    private void restart(BisqEnvironment bisqEnvironment) {
-        stopped = true;
-        statistics.gracefulShutDown(() -> {
-            //noinspection finally
+    @Override
+    protected void launchApplication() {
+        UserThread.execute(() -> {
             try {
-                final String[] tokens = bisqEnvironment.getAppDataDir().split("_");
-                String logPath = "error_" + (tokens.length > 1 ? tokens[tokens.length - 2] : "") + ".log";
-                RestartUtil.restartApplication(logPath);
-            } catch (IOException e) {
-                log.error(e.toString());
+                statistics = new Statistics();
+                UserThread.execute(this::onApplicationLaunched);
+            } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                log.warn("Shutdown complete");
-                System.exit(0);
             }
         });
+    }
+
+    @Override
+    protected void onApplicationLaunched() {
+        super.onApplicationLaunched();
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // We continue with a series of synchronous execution tasks
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    protected AppModule getModule() {
+        return new ModuleForAppWithP2p(bisqEnvironment);
+    }
+
+    @Override
+    protected void applyInjector() {
+        super.applyInjector();
+
+        statistics.setInjector(injector);
+    }
+
+    @Override
+    protected void startApplication() {
+        statistics.startApplication();
     }
 }
