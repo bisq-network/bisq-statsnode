@@ -17,8 +17,8 @@
 
 package bisq.statistics;
 
-import bisq.core.app.AppSetup;
-import bisq.core.app.AppSetupWithP2P;
+import bisq.core.app.misc.AppSetup;
+import bisq.core.app.misc.AppSetupWithP2P;
 import bisq.core.offer.OfferBookService;
 import bisq.core.provider.price.PriceFeedService;
 import bisq.core.trade.statistics.TradeStatisticsManager;
