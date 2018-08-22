@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'network.bisq'
-version = '0.8.0'
+version = '0.8.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compile 'network.bisq:bisq-core:0.8.0'
+    compile 'network.bisq:bisq-core:-SNAPSHOT'
     compileOnly 'org.projectlombok:lombok:1.16.16'
     annotationProcessor 'org.projectlombok:lombok:1.16.16'
 }
